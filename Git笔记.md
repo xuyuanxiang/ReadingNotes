@@ -189,7 +189,7 @@ git remote [-v]
 
 **创建远程分支**到本地：
 ```bash
-git checkout -b <remote-repo-name/branch-name>
+git checkout -b <branch-name> <remote-repo-name/branch-name>
 ```
 推送自己的修改：
 ```

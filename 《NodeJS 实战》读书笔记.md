@@ -58,3 +58,32 @@ npm rm package
 npm view package
 ```
 
+关于尾递归
+===
+假定某个函数，它会处理一些I/O操作（比如解析某个日志文件），然后定期执行，另外你需要确保这个日志文件只能同时被一个函数解析（注：试想解析过程很长，周期间隔很短）。此时setInterval将不再是最佳方案。因为setInterval中的函数并不会判断是否上一个周期中的函数已经执行完毕，也就无法确保日志文件在同一时间只被一个函数处理。
+
+假定现在有一个异步函数叫async，它会进行一些I/O操作，然后在完成后调用回调函数。我们让它每秒执行一次：
+```javascript
+var interval = 1000;
+setInterval(function() {
+	async(function() {
+		console.log('async is done!');
+	});
+});
+```
+如果现在要求任意两个async函数之间在时间上不能重叠，就应该使用下面的方式：
+```
+var interval = 1000;
+(function schedule() {
+	setTimeout(function() {
+		async(function() {
+			console.log('async is done!');
+			schedule();
+		});
+	}, interval);
+})();
+```
+上面的代码中，我们先声明了函数schedule并立即执行了它。 函数schedule调用setTimeout来让另一个函数（之后称作定时器函数）在一秒后执行。定时器函数会调用async，当async完成I/O操作并回调之后，通过再次调用schedule，会设置一个新的定时器，以此重复。这样我们就能确保不再会同时调用async函数。
+
+与setInterval不同的是：这种方式async将不会在每一秒都能执行“一次”，不过它可以保证你在上一次调用async结束1秒后，重新执行async函数。
+
