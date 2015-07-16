@@ -56,3 +56,58 @@ function createSquare(config:SquareConfig):{color:string;area:number} {
 
 var mySquare = createSquare({color:"black"});	
 ```
+
+### 函数类型
+使用调用签名（call signature)来描述函数接口：
+*`调用签名`类似于定义函数时没有给出函数名只给出参数列表和返回类型。*
+
+	interface SearchFunc {
+		(source: string, subString: string): boolean;
+	}
+	
+	var mySearch: SearchFunc;
+	mySearch = function(source: string, subString: string) {
+		var result = source.search(subString);
+		if (result == -1) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+函数的参数会被顺序检查，参数名并不需要和interface中所定义的一致。
+函数返回number或string时，类型检查器将会给出警告。
+
+### 数组类型
+
+	interface StringArray {
+		[index: number]: string;
+	}
+	
+	var myArray: StringArray;
+	myArray = ["Bob", "Fred"];
+	
+`[index: number]`：索引（index）类型支持：string 和 number。
+
+`: string`：通过索引所获取的数组元素的类型
+
+**注意**：有一个严格的限制，数字类型索引的返回值类型必须是字符类型索引返回值类型的子类。
+
+	interface Dictionary {
+		[index: string]: string;
+		length: number; // ERROR
+	}
+	
+索引类型为string，且索引返回类型为string，则length的返回类型必须是string的子类,
+例如：
+
+	class Base {}
+	
+	class Sub extends Base {}
+	
+	interface Dictionary {
+		[index: string]: Base;
+		propertyOOXX: Sub;
+	}
+	
+
