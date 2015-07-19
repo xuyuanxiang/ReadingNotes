@@ -1,4 +1,4 @@
-# TypeScript学习笔记
+d# TypeScript学习笔记
 
 ## Interfaces
 
@@ -110,4 +110,18 @@ var mySquare = createSquare({color:"black"});
 		propertyOOXX: Sub;
 	}
 	
+### 接口与实现类（Class Types）
+
+	interface ClockInterface {
+		currentTime: Date;
+	}
+	
+	class Clock implements ClockInterface {
+		currentTime: Date;
+		setTime(d: Date) {
+			this.currentTime = d;
+		}
+		constructor(h: number, m: number){}
+	}
+
 
