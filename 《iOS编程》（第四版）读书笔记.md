@@ -70,3 +70,57 @@ Objective-C对象都有一个名为`isa(is a)`的实例变量。对象可以通�
 确定父-子关系后，就可以让父对象拥有子对象，并确保子对象不会拥有父对象。
 
 具有弱引用特性的指针指向的对象被释放后，指针会自动设置为nil。
+
+## 属性特性
+
+	@property (多线程特性, 读/写特性, 内存管理特性) 属性类型 属性名称;
+	
+### 多线程特性（Multi-threading attribute）
+
+1. **nonatomic**
+2. **atomic** （默认）
+
+### 读/写特性（Read/write attribute）
+
+1. **readwrite** （默认）
+2. **readonly**
+
+### 内存管理特性（Memory management attribute）
+
+1. strong（指向Objective-C对象的属性的默认值）
+2. weak
+3. copy
+4. unsafe_unretained（非对象属性的默认值）
+
+对于**不指向任何对象**的属性，不需要做内存管理，这是应选用`unsafe_unretained`，它表示存取方法会直接为实例变量赋值。 *Apple引入ARC之前曾经使用assign表示这种类型*。
+
+`unsafe_unretained`中的`unsafe`（不安全）是相对于弱引用而言。与弱引用不同，该类型的指针指向的对象被销毁时，指针不会自动设置为nil，而是成为空指针，因此不安全。
+
+通常情况下，当某个属性是指向其他对象的指针，而且该对象的类有可修改的子类（例如NSString/NSMutableString或NSArray/NSMutableArray）时，应该将该属性的内存管理特性设置为copy。
+
+`copy`属性的存方法可能类似于：
+
+	- (void)setName:(NSString *) name
+	{
+		_name = [name copy];
+	}
+	
+这样做的原因是，如果属性指向的对象的类有可修改的子类，那么该属性可能会指向可修改的子类对象，同时，该对象可能会被其他拥有者修改。因此，最好先复制该对象，然后再将属性指向复制后的对象。`copy`方法返回的是拥有强引用特性的指针。
+
+## 属性合成
+
+*在头文件中声明属性时，只会生成存取方法的声明。*为了让属性生成实例变量并实现存取方法，该属性必须被合成（synthesized）。通常情况下，编译器会自动合成属性并生成默认的实例变量和存取方法。如果需要自定义属性的合成方式，可以在实现文件中使用@synthesized指令：
+
+	@implementation Person
+	// 创建存取方法，方法名是age和setAge:,
+	// 同时创建实例变量_age
+	@synthesized age = _age;
+	@end
+	
+以上代码与编译器自动合成的效果相同。赋值号左边的age表示需要创建存取方法，方法名是**age**和**setAge:**。右边的_age表示需要创建实例变量，变量名为_age。
+
+也可以不写变量名，这样实例变量的变量名会和方法名相同：
+
+	@synthesized age;
+	// 和以下语句效果相同：
+	@synthesized age = age;
